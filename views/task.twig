@@ -1,0 +1,14 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+  <h1>Task Creation</h1>
+  <form method="post" action="/task/create">
+  <label for="name">Task name</label>
+  <input type="text" name="name" required><br>
+  <label for="description">Description</label>
+  <input type="text" name="description" required><br>
+   <input type="submit" value="Submit">
+   <input type="reset" value="Reset">
+  </form>
+ 
+{% endblock %}
