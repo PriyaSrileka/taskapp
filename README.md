@@ -27,7 +27,7 @@ Start a container based on your new image:
 docker run -d -p 3333:3000 task-app
 ```
 
-Visit your application in a browser at [http://localhost:3333] or  [http://192.168.99.100:3333/task]. If localhost is not working then try with your docker machine ip.
+Visit your application in a browser at [http://localhost:3333/task] or  [http://192.168.99.100:3333/task]. If localhost is not working then try with your docker machine ip.
 You should see the task creation form. You can fill the name, description field and submit the form.
 
 Run Application using docker compose
