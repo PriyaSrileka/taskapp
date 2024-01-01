@@ -10,6 +10,13 @@ cd task-app
 ```
 Run application using npm 
 ```
+Step1: Install the dependencies 
+```
+npm install
+```
+
+Step2: Run the application 
+```
 npm start
 ```
 

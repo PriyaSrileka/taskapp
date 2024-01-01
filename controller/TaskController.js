@@ -1,7 +1,6 @@
 const Web3 = require("web3");
 const { default: Common }  = require ('@ethereumjs/common');
-const config=require('../config');
-
+const config = require('../config');
 var provider = config.infuraProjectId;
 var web3 = new Web3(new Web3.providers.HttpProvider(provider));
 var Tx = require('ethereumjs-tx').Transaction;
@@ -16,17 +15,17 @@ exports.form = async (req, res, next) => {
 };
 
 exports.create = async (req, res, next) => {
-   console.log(req.body);
+   if (!req.body.name) {
+    return res.status(400).json({
+      status: 'error',
+      error: 'req body cannot be empty',
+    });
+  }
    let name = req.body.name;
    let description = req.body.description;
    const taskEncode = await contract.methods.createTask(name, description).encodeABI();
    const nonce = await web3.eth.getTransactionCount("0x134BAEfB4E464bAA88F85D1DE4639F2082324bB3", 'pending');
-   const estimateGas = await web3.eth.estimateGas({
-     "from"      : from,       
-     "nonce"     : web3.utils.toHex(nonce), 
-     "to"        : contractAddress,     
-     "data"      : taskEncode
-})
+   
 
     const txParams = {
       nonce: web3.utils.toHex(nonce),
@@ -40,18 +39,24 @@ exports.create = async (req, res, next) => {
     var common = new Common({ chain: 'goerli' });
     var tx = new Tx(txParams, {"common": common});
 	tx.sign(Buffer.from(config.privateKey, 'hex'));
-	
-
-    var raw = '0x' + tx.serialize().toString('hex');
-	
-	await web3.eth.sendSignedTransaction(raw)
-		.on('confirmation', (confirmationNumber, receipt) => {res.send('Successfully created the task. Visit the given link to verify the transaction. https://goerli.etherscan.io/tx/' + receipt.transactionHash); })
-		.on('receipt', (txReceipt) => {
-			console.log("signAndSendTx txReceipt. Tx Address: " + txReceipt.transactionHash);
-		})
-		.on('error', error => {console.log(error);
-		res.send('Transaction failed');
-	});   
+	var raw = '0x' + tx.serialize().toString('hex');
+	try{
+	const receipt = await web3.eth.sendSignedTransaction(raw);
+	status = {
+            "success": "true",
+            "message": "Successfully created the task. Visit the given link to verify the transaction. https://goerli.etherscan.io/tx/" + receipt.transactionHash
+        },
+                res.status(200).json(status);
+			
+		
+	}catch(err){
+		console.log(err);
+		status = {
+            "success": "false",
+            "message": "Something went wrong"
+        },
+		res.status(400).json(status);
+	}
 };
 
 
