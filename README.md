@@ -9,10 +9,10 @@ git clone https://github.com/PriyaSrileka/taskapp.git
 cd task-app
 ```
 Run application using npm 
+
+Step1: Install the dependencies
 ```
-Step1: Install the dependencies 
-```
-npm install
+npm install 
 ```
 
 Step2: Run the application 
