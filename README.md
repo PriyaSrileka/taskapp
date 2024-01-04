@@ -2,14 +2,12 @@
 
 ## Development
 
-Routes available
+Routes available:
 /
 /task
-/task/create
 /task/assign/form
-/task/assign
 /task/complete/form
-/task/completed
+
 
 To get a local copy of the code, clone it using git:
 
