@@ -59,6 +59,128 @@ exports.create = async (req, res, next) => {
 	}
 };
 
+exports.assignForm = async (req, res, next) => {
+   res.render('assign');
+};
+
+
+exports.assignTask = async (req, res, next) => {
+   if (!req.body) {
+    return res.status(400).json({
+      status: 'error',
+      error: 'req body cannot be empty',
+    });
+  }
+   let taskId = req.body.taskId;
+   let assignee = req.body.assignTo;
+   const tasks = await contract.methods.tasks(taskId).call();
+   if(tasks.name == ""){
+	   return res.status(400).json({
+      status: 'error',
+      error: 'Task Id does not exist',
+    });
+   }
+   const taskEncode = await contract.methods.assignTask(taskId, assignee).encodeABI();
+   const nonce = await web3.eth.getTransactionCount("0x134BAEfB4E464bAA88F85D1DE4639F2082324bB3", 'pending');
+   
+
+    const txParams = {
+      nonce: web3.utils.toHex(nonce),
+	  gasPrice: web3.utils.toHex(web3.utils.toWei('2', "gwei")), 
+      gasLimit:  160000,
+	  from: from,
+      to: contractAddress,
+      value: '0x00',
+      data: taskEncode
+    };
+    var common = new Common({ chain: 'goerli' });
+    var tx = new Tx(txParams, {"common": common});
+	tx.sign(Buffer.from(config.privateKey, 'hex'));
+	var raw = '0x' + tx.serialize().toString('hex');
+	try{
+	const receipt = await web3.eth.sendSignedTransaction(raw);
+	status = {
+            "success": "true",
+            "message": "Successfully assigned the task. Visit the given link to verify the transaction. https://goerli.etherscan.io/tx/" + receipt.transactionHash
+        },
+                res.status(200).json(status);
+			
+		
+	}catch(err){
+		console.log(err);
+		status = {
+            "success": "false",
+            "message": "Something went wrong"
+        },
+		res.status(400).json(status);
+	}
+   
+};
+
+exports.taskCompletionForm = async (req, res, next) => {
+   res.render('complete');
+};
+
+exports.completed = async (req, res, next) => {
+	   if (!req.body) {
+		return res.status(400).json({
+		  status: 'error',
+		  error: 'req body cannot be empty',
+		});
+	  }
+	  if(req.body.taskCompleted != 'Completed'){
+		  return res.status(400).json({
+		  status: 'error',
+		  error: 'User should mark task as completed',
+		});
+	  }
+   let taskId = req.body.taskId;
+   console.log("Task completion: "+req.body.taskCompleted);
+   const tasks = await contract.methods.tasks(taskId).call();
+   if(tasks.name == ""){
+	   return res.status(400).json({
+      status: 'error',
+      error: 'Task Id does not exist',
+    });
+   }
+   
+  
+   const taskEncode = await contract.methods.taskCompleted(taskId).encodeABI();
+   const nonce = await web3.eth.getTransactionCount("0x471745b100D5b260e8A50e3d74010afEbFE05AC5", 'pending');
+   
+
+    const txParams = {
+      nonce: web3.utils.toHex(nonce),
+	  gasPrice: web3.utils.toHex(web3.utils.toWei('2', "gwei")), 
+      gasLimit:  160000,
+	  from: '0x471745b100D5b260e8A50e3d74010afEbFE05AC5',
+      to: contractAddress,
+      value: '0x00',
+      data: taskEncode
+    };
+    var common = new Common({ chain: 'goerli' });
+    var tx = new Tx(txParams, {"common": common});
+	tx.sign(Buffer.from(config.assigneePrivateKey, 'hex'));
+	var raw = '0x' + tx.serialize().toString('hex');
+	try{
+	const receipt = await web3.eth.sendSignedTransaction(raw);
+	status = {
+            "success": "true",
+            "message": "Successfully completed the task. Visit the given link to verify the transaction. https://goerli.etherscan.io/tx/" + receipt.transactionHash
+        },
+                res.status(200).json(status);
+			
+		
+	}catch(err){
+		console.log(err);
+		status = {
+            "success": "false",
+            "message": "Something went wrong"
+        },
+		res.status(400).json(status);
+	}
+};
+
 
 
 
